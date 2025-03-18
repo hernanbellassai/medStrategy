@@ -20,27 +20,23 @@ function App() {
       allLetters = allLetters.concat(Array.from(line.querySelectorAll('.letter')));
     });
 
-    // Animación inicial: iluminar letras una por una con glow
+    // Animación inicial: iluminar letras una por una con glow (sin contorno)
     let index = 0;
     const animateLetters = () => {
       if (index > 0) {
-        allLetters[index - 1].style.webkitTextStroke = '2px #b0b0b0';
-        allLetters[index - 1].style.textStroke = '2px #b0b0b0';
-        allLetters[index - 1].style.textShadow = 'none';
+        allLetters[index - 1].style.textShadow = 'none'; // Solo sombra, sin contorno
       }
       if (index >= allLetters.length) {
         return;
       }
-      allLetters[index].style.webkitTextStroke = '2px #ffffff';
-      allLetters[index].style.textStroke = '2px #ffffff';
-      allLetters[index].style.textShadow = '0 0 10px #ffffff, 0 0 20px #ffffff, 0 0 30px #00b4d8';
+      allLetters[index].style.textShadow = '0 0 10px #ffffff, 0 0 20px #ffffff, 0 0 30px #00b4d8'; // Solo glow
       index++;
       setTimeout(animateLetters, 100);
     };
 
     animateLetters();
 
-    // Efecto de linterna con el mouse
+    // Efecto de linterna con el mouse (sin contorno)
     const handleMouseMove = (e) => {
       const rect = title.getBoundingClientRect();
       const mouseX = e.clientX - rect.left;
@@ -55,14 +51,12 @@ function App() {
         );
         const isHovered = letter.matches(':hover');
         if (distance < 50) {
-          letter.style.webkitTextStroke = '2px #ffffff';
-          letter.style.textStroke = '2px #ffffff';
+          letter.style.textShadow = '0 0 10px #ffffff, 0 0 20px #ffffff, 0 0 30px #00b4d8'; // Solo glow
           if (!isHovered) {
             letter.style.textShadow = 'none';
           }
         } else {
-          letter.style.webkitTextStroke = '2px #b0b0b0';
-          letter.style.textStroke = '2px #b0b0b0';
+          letter.style.textShadow = 'none'; // Sin contorno ni sombra fuera del rango
           if (!isHovered) {
             letter.style.textShadow = 'none';
           }
