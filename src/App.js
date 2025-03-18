@@ -6,6 +6,7 @@ function App() {
   const [isLoginExpanded, setIsLoginExpanded] = useState(true);
   const [showContent, setShowContent] = useState(false);
   const [showWhiteSection, setShowWhiteSection] = useState(false);
+  const [whiteSectionPosition, setWhiteSectionPosition] = useState(100); // Posición inicial fuera de la pantalla (en vh)
 
   useEffect(() => {
     const title = document.querySelector('h1');
@@ -71,7 +72,7 @@ function App() {
 
     title.addEventListener('mousemove', handleMouseMove);
 
-    // Efecto de scroll para mover el login, mostrar contenido y cambiar fondo
+    // Efecto de scroll para mover el login, mostrar contenido y aplicar parallax
     const login = document.querySelector('.login');
     const content = document.querySelector('.content');
     const handleScroll = () => {
@@ -95,18 +96,29 @@ function App() {
         setShowContent(false);
       }
 
-      // Cambiar fondo y mostrar WhiteSection cuando las secciones hayan pasado completamente
+      // Aplicar parallax a la WhiteSection cuando las secciones hayan pasado completamente
       if (content) {
         const contentRect = content.getBoundingClientRect();
-        const contentBottom = contentRect.bottom;
+        const contentTop = contentRect.top + window.scrollY;
+        const contentHeight = contentRect.height;
+        const contentBottom = contentTop + contentHeight;
 
-        // Activamos la sección blanca y cambiamos el fondo cuando la parte inferior de las secciones haya pasado el viewport
-        if (contentBottom <= 0) { // Cuando las secciones ya no están visibles en la pantalla
+        // Ajustamos el momento de inicio para que comience antes (200px antes de contentBottom)
+        if (window.scrollY >= contentBottom - 300) {
           setShowWhiteSection(true);
-          document.body.classList.add('white-background');
+
+          // Calcular el desplazamiento para el efecto parallax
+          const scrollDistance = window.scrollY - (contentBottom - 200); // Distancia desde el nuevo punto de inicio
+          const maxTranslate = 0; // Posición final (arriba de la pantalla)
+          const initialTranslate = 100; // Posición inicial (fuera de la pantalla, abajo)
+          const translateRange = window.innerHeight * 0.5; // Distancia de scroll para completar el movimiento
+          const translateY = initialTranslate - (scrollDistance / translateRange) * initialTranslate;
+
+          // Limitar el movimiento entre initialTranslate y maxTranslate
+          setWhiteSectionPosition(Math.max(maxTranslate, translateY));
         } else {
           setShowWhiteSection(false);
-          document.body.classList.remove('white-background');
+          setWhiteSectionPosition(100); // Reinicia la posición cuando no está activa
         }
       }
     };
@@ -160,9 +172,30 @@ function App() {
             <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
           </section>
         </div>
-        <div className={`white-section ${showWhiteSection ? 'visible' : ''}`}>
-          <h2>Nueva Sección Blanca</h2>
-          <p>Esta es una nueva sección con un fondo blanco para cambiar la temática.</p>
+        <div
+          className={`white-section ${showWhiteSection ? 'visible' : ''}`}
+          style={{ transform: `translateY(${whiteSectionPosition}vh)` }}
+        >
+          <div className="cards-container">
+            <div className="card">
+              <div className="card-icon">📱</div>
+              <h3>Save with Apple Trade In</h3>
+              <p>Get $170-$630 in credit toward iPhone 16 or iPhone 16 Pro when you trade in iPhone 12 or higher.*</p>
+              <button className="card-button">+</button>
+            </div>
+            <div className="card">
+              <div className="card-icon">💳</div>
+              <h3>Pay over time, interest-free</h3>
+              <p>When you choose to check out with Apple Card Monthly Installments.*</p>
+              <button className="card-button">+</button>
+            </div>
+            <div className="card">
+              <div className="card-icon">📡</div>
+              <h3>Apple. Your one-stop shop for incredible carrier deals</h3>
+              <p>Get up to $1000 in credit on a new iPhone with AT&T, Boost Mobile, T-Mobile, or Verizon. Trade-in may be required.*</p>
+              <button className="card-button">+</button>
+            </div>
+          </div>
         </div>
       </main>
     </div>
