@@ -7,9 +7,13 @@ function App() {
   const [showContent, setShowContent] = useState(false);
   const [showWhiteSection, setShowWhiteSection] = useState(false);
   const [whiteSectionPosition, setWhiteSectionPosition] = useState(100); // Posición inicial fuera de la pantalla (en vh)
+  const [showNavbar, setShowNavbar] = useState(false); // Estado para mostrar la navbar
+  const [showMenu, setShowMenu] = useState(false); // Estado para el menú desplegable
 
   useEffect(() => {
     const title = document.querySelector('h1');
+    const login = document.querySelector('.login');
+    const content = document.querySelector('.content');
     const lines = title.querySelectorAll('.title-line-text');
     let allLetters = [];
 
@@ -66,9 +70,7 @@ function App() {
 
     title.addEventListener('mousemove', handleMouseMove);
 
-    // Efecto de scroll para mover el login, mostrar contenido y aplicar parallax
-    const login = document.querySelector('.login');
-    const content = document.querySelector('.content');
+    // Efecto de scroll para mover el login a la navbar, mostrar contenido, aplicar parallax y mostrar navbar
     const handleScroll = () => {
       if (window.scrollY > 100) {
         if (login) {
@@ -76,10 +78,12 @@ function App() {
           if (isLoginExpanded) {
             setIsLoginExpanded(false);
           }
+          setShowNavbar(true); // Mostrar navbar cuando login se mueve
         }
       } else {
         if (login) {
           login.classList.remove('login-scrolled');
+          setShowNavbar(false); // Ocultar navbar cuando login vuelve
         }
       }
 
@@ -97,22 +101,19 @@ function App() {
         const contentHeight = contentRect.height;
         const contentBottom = contentTop + contentHeight;
 
-        // Ajustamos el momento de inicio para que comience antes (200px antes de contentBottom)
         if (window.scrollY >= contentBottom - 300) {
           setShowWhiteSection(true);
 
-          // Calcular el desplazamiento para el efecto parallax
-          const scrollDistance = window.scrollY - (contentBottom - 200); // Distancia desde el nuevo punto de inicio
-          const maxTranslate = 0; // Posición final (arriba de la pantalla)
-          const initialTranslate = 100; // Posición inicial (fuera de la pantalla, abajo)
-          const translateRange = window.innerHeight * 0.5; // Distancia de scroll para completar el movimiento
+          const scrollDistance = window.scrollY - (contentBottom - 200);
+          const maxTranslate = 0;
+          const initialTranslate = 100;
+          const translateRange = window.innerHeight * 0.5;
           const translateY = initialTranslate - (scrollDistance / translateRange) * initialTranslate;
 
-          // Limitar el movimiento entre initialTranslate y maxTranslate
           setWhiteSectionPosition(Math.max(maxTranslate, translateY));
         } else {
           setShowWhiteSection(false);
-          setWhiteSectionPosition(100); // Reinicia la posición cuando no está activa
+          setWhiteSectionPosition(100);
         }
       }
     };
@@ -126,9 +127,64 @@ function App() {
     };
   }, [isLoginExpanded]);
 
+  // Función para manejar el scroll suave
+  const handleNavClick = (sectionId) => {
+    let element;
+    if (sectionId === 'home') {
+      element = document.querySelector('.title-container');
+    } else if (sectionId === 'about') {
+      element = document.querySelector('.content');
+    } else if (sectionId === 'services') {
+      element = document.querySelector('.white-section');
+    }
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+    setShowMenu(false); // Cerrar el menú al hacer clic en un enlace
+  };
+
+  // Toggle del menú desplegable
+  const toggleMenu = (e) => {
+    e.preventDefault();
+    setShowMenu(!showMenu);
+  };
+
   return (
     <div className="App">
-      <header className="header"></header>
+      <header className="header">
+        <nav className={`navbar ${showNavbar ? 'navbar-visible' : ''}`}>
+          <div className="navbar-logo" onClick={toggleMenu}>
+            <img src={logo} alt="Logo" className="navbar-logo-img" />
+            {showMenu && (
+              <div className="dropdown-menu">
+                <ul>
+                  <li><a href="#option1" onClick={(e) => { e.preventDefault(); alert('Opción 1 seleccionada'); }}>Opción 1</a></li>
+                  <li><a href="#option2" onClick={(e) => { e.preventDefault(); alert('Opción 2 seleccionada'); }}>Opción 2</a></li>
+                  <li><a href="#option3" onClick={(e) => { e.preventDefault(); alert('Opción 3 seleccionada'); }}>Opción 3</a></li>
+                </ul>
+              </div>
+            )}
+          </div>
+          {showNavbar && (
+            <ul className="navbar-links">
+              <li><a href="#home" onClick={(e) => { e.preventDefault(); handleNavClick('home'); }}>Home</a></li>
+              <li><a href="#about" onClick={(e) => { e.preventDefault(); handleNavClick('about'); }}>About</a></li>
+              <li><a href="#services" onClick={(e) => { e.preventDefault(); handleNavClick('services'); }}>Services</a></li>
+              <li className="login-nav">
+                {!isLoginExpanded ? (
+                  <button className="login-button-nav" onClick={() => setIsLoginExpanded(true)}>Iniciar Sesión</button>
+                ) : (
+                  <>
+                    <input type="text" placeholder="Usuario" />
+                    <input type="password" placeholder="Contraseña" />
+                    <button onClick={() => setIsLoginExpanded(false)}>Iniciar Sesión</button>
+                  </>
+                )}
+              </li>
+            </ul>
+          )}
+        </nav>
+      </header>
       <main className="main">
         <div className="title-container">
           <h1>
